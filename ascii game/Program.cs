@@ -8,7 +8,7 @@ namespace ascii_game
         public int x;
         public int y;
         public char whatToShowThere;
-        //garfield you are a figment of my imagination garfield
+        //garfield you are a figment of my imagination garfield garfield!
     }
 
     class Program
