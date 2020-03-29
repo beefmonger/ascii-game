@@ -1,39 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 namespace ascii_game
-{
-
-    class Pixel
+{    
+    class pixel
     {
-        public int x;
-        public int y;
-        public char whatToShowThere;
-        //garfield you are a figment of my imagination garfield garfield!
-    }
+        //private data members
+        public int x { get; set; }
+        public int y { get; set; }
+        public char pixelChar { get; set; }
 
+
+        //garfield i love you
+    }
+    class goblin {
+
+        public float health { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public bool seesPlayer { get; set; }
+        public float fiendishness { get; set; }
+
+    }
     class Program
     {
         static void Main(string[] args)
         {
             //declare variables
+            int displayWidth = 9;
+            int displayHeight = 7;
             int currentMapWidth = 20;
             int currentMapHeight = 10;
             int playerX = 0;
             int playerY = 0;
-            int cameraX;
-            int cameraY;
+            int cameraX = playerX;
+            int cameraY = playerY;
             bool gameRunning = false;
             char avatarSprite = 'v';
             char floorSprite = '_';
             bool appRunning = false;
             string entireDisplayString = "the display should go here";
+            char goblinSprite = 'g';
+            int currentMap;
 
             //run app
             appRunning = true;
-
             while (appRunning)
             {
-
                 //prompt and store displayWidth and displayHeight (disabled)
                 /*
                 Console.Write("Enter map width:\n");
@@ -41,38 +54,63 @@ namespace ascii_game
                 Console.Write("Enter map height:\n");
                 Int32.TryParse(Console.ReadLine(), out currentMapHeight);
                 */
-
-
+                List<pixel> pixelList = new List<pixel>();
                 //run game
                 gameRunning = true;
-
-                //main game running sequence 
                 while (gameRunning)
                 {
-                    
-                    entireDisplayString = "";
-                    for (int renderYStep = 0; renderYStep <= (currentMapHeight - 1); renderYStep++)
+                    //assign pixelList
+                    pixelList.Clear();
+                    for (int assignYStep = 0; assignYStep <= (currentMapHeight - 1); assignYStep++)
                     {
-                        for (int renderXStep = 0; renderXStep <= (currentMapWidth - 1); renderXStep++)
-                        {
-                            //if in player position, add player, else add floor
-                            if (renderXStep == playerX && renderYStep == playerY) { entireDisplayString = entireDisplayString + avatarSprite; }
-                            else { entireDisplayString = entireDisplayString + floorSprite; }
+                        for (int assignXStep = 0; assignXStep <= (currentMapWidth - 1); assignXStep++)
+                        {                               
+                            //assign char to current pixel being assigned
+                            if (assignXStep == playerX && assignYStep == playerY) 
+                            {
+                                pixelList.Add(new pixel() { x = assignXStep, y = assignYStep, pixelChar = avatarSprite });
+                            }
+                            else 
+                            { 
+                                pixelList.Add(new pixel() { x = assignXStep, y = assignYStep, pixelChar = floorSprite }); 
+                            }
                         }
-
-                        //ends that line of pixels
-                        entireDisplayString = entireDisplayString + "\n";
                     }
+                    pixelList.TrimExcess();
 
+                    //render: this is where you're gonna use camera coords and visibility.
+                    entireDisplayString = "";
+                    for (int renderYStep = 0; renderYStep <= (displayHeight - 1); renderYStep++)
+                    {
+                        for (int renderXStep = 0; renderXStep <= (displayWidth - 1); renderXStep++)
+                        {
+                            // Find pixel by its coords
+                            pixel result = pixelList.Find
+                            (
+                            delegate (pixel pixel)
+                            {
+                                return (pixel.x == renderXStep + cameraX - 0.5 * (displayWidth - 1) && pixel.y == renderYStep + cameraY - 0.5 * (displayHeight - 1));
+                            }
+                            );
+
+                            if (result != null) 
+                            { 
+                                entireDisplayString = entireDisplayString + result.pixelChar; 
+                            } 
+                            else 
+                            { 
+                                entireDisplayString = entireDisplayString + ' '; 
+                            }
+                        }
+                        entireDisplayString = entireDisplayString + "\n";
+                    } 
                     Console.Clear();
                     Console.Write(entireDisplayString);
 
                     //gather and interpret player input
                     ConsoleKeyInfo ckiMainTurnInput = Console.ReadKey(true);
-
-                        //interpret player input
-                        switch (ckiMainTurnInput.KeyChar)
-                        {
+                    switch (ckiMainTurnInput.KeyChar)
+                    {
 
                             case 's':
                                 playerY++;
@@ -92,12 +130,14 @@ namespace ascii_game
                             default:                                
                                 break;
                         }
+                    cameraX = playerX;
+                    cameraY = playerY;
+                    Thread.Sleep(10);
                 }
 
+                //end gameRunning loop, end menu prompts
                 Console.Write("Game ended. Press R to restart, press Q again to finish.");
-
-                ConsoleKeyInfo ckiEndInput = Console.ReadKey(true);
-                
+                ConsoleKeyInfo ckiEndInput = Console.ReadKey(true);               
                 switch (ckiEndInput.KeyChar)
                 {
                     case 'r':
